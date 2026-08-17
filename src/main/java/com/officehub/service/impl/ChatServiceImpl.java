@@ -20,7 +20,7 @@ import com.officehub.repository.UserRepository;
 import com.officehub.service.ChatService;
 import java.time.LocalDateTime;
 import java.util.Objects;
-
+import java.time.ZoneOffset;
 import com.officehub.entity.Organization;
 
 @Service
@@ -77,7 +77,9 @@ public class ChatServiceImpl implements ChatService {
         message.setOrganization(senderOrganization);
         message.setContent(request.getContent());
         message.setStatus(MessageStatus.SENT);
-        message.setSentAt(LocalDateTime.now());
+        message.setSentAt(
+        	    LocalDateTime.now(ZoneOffset.UTC)
+        	);
 
         message = chatMessageRepository.save(message);
 
@@ -225,7 +227,7 @@ public class ChatServiceImpl implements ChatService {
         long secondsSinceSent =
                 Duration.between(
                         message.getSentAt(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(ZoneOffset.UTC)
                 ).getSeconds();
 
         if (secondsSinceSent > 5 * 60) {
@@ -302,7 +304,7 @@ public class ChatServiceImpl implements ChatService {
         long secondsSinceSent =
                 Duration.between(
                         message.getSentAt(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(ZoneOffset.UTC)
                 ).getSeconds();
 
         if (secondsSinceSent > 5 * 60) {
