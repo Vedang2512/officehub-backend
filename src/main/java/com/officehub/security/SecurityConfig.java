@@ -1,6 +1,7 @@
 package com.officehub.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,8 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config)
@@ -38,7 +40,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173",
+                        frontendUrl
+                )
         );
 
         configuration.setAllowedMethods(
