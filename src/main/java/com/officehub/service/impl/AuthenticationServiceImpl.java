@@ -42,6 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     	
     	if (request.getRole() == null ||
     		    (request.getRole() != Role.OWNER &&
+    		     request.getRole() != Role.MANAGER &&
     		     request.getRole() != Role.EMPLOYEE)) {
 
     		    throw new IllegalArgumentException(
