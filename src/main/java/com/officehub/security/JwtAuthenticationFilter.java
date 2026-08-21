@@ -28,6 +28,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getServletPath();
+
+        return path.startsWith("/api/auth/")
+                || path.startsWith("/ws/");
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -43,30 +52,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             token = authHeader.substring(7);
 
-            username = jwtUtil.extractUsername(token);
-        }
+            try {
 
-        if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+                username = jwtUtil.extractUsername(token);
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(username);
+                if (username != null &&
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication() == null) {
 
-            if (jwtUtil.validateToken(token, userDetails)) {
+                    UserDetails userDetails =
+                            userDetailsService
+                                    .loadUserByUsername(username);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
+                    if (jwtUtil.validateToken(token, userDetails)) {
 
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request));
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails,
+                                        null,
+                                        userDetails.getAuthorities());
 
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authentication);
+                        authentication.setDetails(
+                                new WebAuthenticationDetailsSource()
+                                        .buildDetails(request));
+
+                        SecurityContextHolder
+                                .getContext()
+                                .setAuthentication(authentication);
+                    }
+                }
+
+            } catch (Exception e) {
+
+                // Ignore invalid or expired JWT.
+                // The request will continue without authentication
+                // and Spring Security will decide whether authentication
+                // is required for the requested endpoint.
+
             }
         }
 
